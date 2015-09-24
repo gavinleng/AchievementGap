@@ -27,7 +27,7 @@ def download(url, sheet, reqFields, outPath):
     dName = outPath
 
     col = ['ecode', 'name', 'year', 'value']
-  
+
     try:
         socket = urllib.request.urlopen(url)
     except urllib.error.HTTPError as e:
@@ -37,12 +37,13 @@ def download(url, sheet, reqFields, outPath):
     except Exception:
         print('excel file download error')
         import traceback
+
         sys.exit('generic exception: ' + traceback.format_exc())
-    
-    #operate this excel file
+
+    # operate this excel file
     xd = pd.ExcelFile(socket)
     df = xd.parse(sheet)
-    
+
     print('indicator checking------')
     for i in range(df.shape[0]):
         yearCol = []
@@ -50,23 +51,24 @@ def download(url, sheet, reqFields, outPath):
             kk = []
             k_asked = "19 in " + k[2:]
             for j in range(df.shape[1]):
-                if df.iloc[i,j] == k_asked:
+                if df.iloc[i, j] == k_asked:
                     kk.append(j)
                     restartIndex = i + 1
 
-            if len(kk)==4:
+            if len(kk) == 4:
                 yearCol.append(kk[3])
-        
-        if len(yearCol)==len(yearReq):
+
+        if len(yearCol) == len(yearReq):
             break
-    
+
     if len(yearCol) != len(yearReq):
-        sys.exit("Requested data " + str(yearReq).strip('[]') + " don't match the excel file. Please check the file at: " + url)
-    
+        sys.exit("Requested data " + str(yearReq).strip(
+            '[]') + " don't match the excel file. Please check the file at: " + url)
+
     raw_data = {}
     for j in col:
         raw_data[j] = []
-    
+
     print('data reading------')
     for i in range(restartIndex, df.shape[0]):
         if re.match(r'E\d{8}$', str(df.iloc[i, 0])):
@@ -77,25 +79,28 @@ def download(url, sheet, reqFields, outPath):
                 raw_data[col[2]].append(yearReq[ii])
                 raw_data[col[3]].append(df.iloc[i, yearCol[ii]])
                 ii += 1
-    
-    #save csv file
+
+    # save csv file
     print('writing to file ' + dName)
     dfw = pd.DataFrame(raw_data, columns=col)
     dfw.to_csv(dName, index=False)
     print('Requested data has been extracted and saved as ' + dName)
     print("finished")
 
+
 parser = argparse.ArgumentParser(description='Extract online Achievement Gap Excel file Table16a to .csv file.')
-parser.add_argument("--generateConfig", "-g", help="generate a config file called config_Alevels.json", action="store_true")
+parser.add_argument("--generateConfig", "-g", help="generate a config file called config_Alevels.json",
+                    action="store_true")
 parser.add_argument("--configFile", "-c", help="path for config file")
 args = parser.parse_args()
 
-if args.generateConfig: 
-    obj = {"url":"https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/418385/SFR_11-2015-Tables_16-24.xlsx",
-           "outPath":"tempAchGap.csv",
-           "sheet":"Table16a",
-           "reqFields": ["2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014"]
-           }
+if args.generateConfig:
+    obj = {
+        "url": "https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/418385/SFR_11-2015-Tables_16-24.xlsx",
+        "outPath": "tempAchGap.csv",
+        "sheet": "Table16a",
+        "reqFields": ["2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014"]
+    }
 
     with open("config_AchGap.json", "w") as outfile:
         json.dump(obj, outfile, indent=4)
