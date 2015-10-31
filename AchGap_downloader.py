@@ -106,7 +106,7 @@ def now():
 
 
 parser = argparse.ArgumentParser(description='Extract online Achievement Gap Excel file Table16a to .csv file.')
-parser.add_argument("--generateConfig", "-g", help="generate a config file called config_Alevels.json",
+parser.add_argument("--generateConfig", "-g", help="generate a config file called config_tempAchGap.json",
                     action="store_true")
 parser.add_argument("--configFile", "-c", help="path for config file")
 args = parser.parse_args()
